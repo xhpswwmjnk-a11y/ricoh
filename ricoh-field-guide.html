@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>GR III HDF — Field Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Fraunces:ital,opsz,wght@0,9..144,300;1,9..144,200;1,9..144,400&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0c0b09;--sf:#141210;--sf2:#1c1a17;--bd:#2c2820;
+  --tx:#f0ebe0;--t2:#9a9080;--t3:#5a5248;
+  --u1:#c0420a;--u1l:rgba(192,66,10,.12);--u1m:rgba(192,66,10,.06);
+  --u2:#3a6ea8;--u2l:rgba(58,110,168,.12);--u2m:rgba(58,110,168,.06);
+  --u3:#4a8a5a;--u3l:rgba(74,138,90,.12);--u3m:rgba(74,138,90,.06);
+  --gold:#c8a84a;
+  --bebas:'Bebas Neue',sans-serif;
+  --mono:'DM Mono',monospace;
+  --serif:'Fraunces',serif;
+}
+body{font-family:var(--mono);background:var(--bg);color:var(--tx);min-height:100svh;overflow-x:hidden}
+.masthead{padding:32px 20px 24px;border-bottom:1px solid var(--bd);background:linear-gradient(180deg,rgba(192,66,10,.08) 0%,transparent 100%)}
+.masthead-eyebrow{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--u1);margin-bottom:8px}
+.masthead-title{font-family:var(--bebas);font-size:52px;letter-spacing:2px;color:var(--tx);line-height:.9}
+.masthead-title em{color:var(--u1);font-style:normal}
+.masthead-sub{font-family:var(--serif);font-size:14px;font-style:italic;font-weight:200;color:var(--t2);margin-top:8px;line-height:1.5}
+.nav{position:sticky;top:0;z-index:50;display:flex;background:rgba(12,11,9,.95);border-bottom:1px solid var(--bd);backdrop-filter:blur(10px)}
+.nav-tab{flex:1;padding:13px 4px 11px;text-align:center;cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;transition:all .2s}
+.nav-slot{font-family:var(--bebas);font-size:18px;letter-spacing:1px;display:block;color:var(--t3);transition:color .2s}
+.nav-name{font-size:7.5px;letter-spacing:1.5px;text-transform:uppercase;display:block;margin-top:2px;color:var(--t3);transition:color .2s}
+.nav-tab[data-s="u1"].active{border-bottom-color:var(--u1)} .nav-tab[data-s="u1"].active .nav-slot,.nav-tab[data-s="u1"].active .nav-name{color:var(--u1)}
+.nav-tab[data-s="u2"].active{border-bottom-color:var(--u2)} .nav-tab[data-s="u2"].active .nav-slot,.nav-tab[data-s="u2"].active .nav-name{color:var(--u2)}
+.nav-tab[data-s="u3"].active{border-bottom-color:var(--u3)} .nav-tab[data-s="u3"].active .nav-slot,.nav-tab[data-s="u3"].active .nav-name{color:var(--u3)}
+.nav-tab[data-s="sc"].active{border-bottom-color:var(--gold)} .nav-tab[data-s="sc"].active .nav-slot,.nav-tab[data-s="sc"].active .nav-name{color:var(--gold)}
+.screen{display:none}.screen.active{display:block}
+.hero{padding:24px 20px 20px;position:relative;overflow:hidden}
+.hero::after{content:'';position:absolute;right:-20px;top:-20px;width:140px;height:140px;border-radius:50%;filter:blur(60px);opacity:.15;pointer-events:none}
+.hero[data-c="u1"]::after{background:var(--u1)} .hero[data-c="u2"]::after{background:var(--u2)} .hero[data-c="u3"]::after{background:var(--u3)}
+.badge{display:inline-flex;align-items:center;gap:8px;padding:5px 12px 5px 8px;border-radius:20px;margin-bottom:14px}
+.badge[data-c="u1"]{background:var(--u1l);border:1px solid var(--u1)} .badge[data-c="u2"]{background:var(--u2l);border:1px solid var(--u2)} .badge[data-c="u3"]{background:var(--u3l);border:1px solid var(--u3)}
+.bdot{width:6px;height:6px;border-radius:50%}
+.bdot[data-c="u1"]{background:var(--u1)} .bdot[data-c="u2"]{background:var(--u2)} .bdot[data-c="u3"]{background:var(--u3)}
+.btxt{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;font-weight:500}
+.btxt[data-c="u1"]{color:var(--u1)} .btxt[data-c="u2"]{color:var(--u2)} .btxt[data-c="u3"]{color:var(--u3)}
+.htitle{font-family:var(--bebas);font-size:38px;letter-spacing:1px;color:var(--tx);line-height:.95;margin-bottom:6px}
+.htagline{font-family:var(--serif);font-size:13px;font-style:italic;font-weight:200;color:var(--t2);margin-bottom:16px;line-height:1.5}
+.wbox{border-radius:10px;padding:12px 14px;margin-bottom:4px}
+.wbox[data-c="u1"]{background:var(--u1m);border:1px solid rgba(192,66,10,.2)} .wbox[data-c="u2"]{background:var(--u2m);border:1px solid rgba(58,110,168,.2)} .wbox[data-c="u3"]{background:var(--u3m);border:1px solid rgba(74,138,90,.2)}
+.wlbl{font-size:8px;letter-spacing:2px;text-transform:uppercase;margin-bottom:5px;font-weight:500}
+.wlbl[data-c="u1"]{color:var(--u1)} .wlbl[data-c="u2"]{color:var(--u2)} .wlbl[data-c="u3"]{color:var(--u3)}
+.wtxt{font-size:11.5px;color:var(--t2);line-height:1.7}
+.sec{padding:20px 20px 4px}
+.sec-ttl{font-size:8px;letter-spacing:2.5px;text-transform:uppercase;color:var(--t3);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.sec-ttl::after{content:'';flex:1;height:1px;background:var(--bd)}
+.acc{border:1px solid var(--bd);border-radius:8px;margin-bottom:6px;overflow:hidden;transition:border-color .2s}
+.acc.op{border-color:var(--t3)}
+.acc-h{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;cursor:pointer;background:var(--sf)}
+.acc-hl{display:flex;align-items:center;gap:10px}
+.adot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.aname{font-size:11px;font-weight:500;color:var(--tx)}
+.aval{font-family:var(--serif);font-size:13px;font-style:italic;color:var(--t2)}
+.aarr{font-size:10px;color:var(--t3);transition:transform .2s}
+.acc.op .aarr{transform:rotate(180deg)}
+.acc-b{display:none;padding:10px 14px 12px;background:var(--sf2);border-top:1px solid var(--bd);font-size:11px;color:var(--t2);line-height:1.7}
+.acc.op .acc-b{display:block}
+.acc-b strong{color:var(--tx);font-weight:500}
+.tip-sec{padding:0 20px 20px}
+.tipcard{border-radius:10px;padding:14px;background:var(--sf);border:1px solid var(--bd);position:relative;overflow:hidden}
+.tipcard::before{content:'TIP';font-family:var(--bebas);font-size:72px;position:absolute;right:-4px;top:-10px;opacity:.04;color:var(--tx);pointer-events:none}
+.tipey{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:6px;font-weight:500}
+.tiptxt{font-size:12px;color:var(--t2);line-height:1.7}
+.tiptxt strong{color:var(--tx);font-weight:500}
+.rec-sec{padding:0 20px 28px}
+.rcard{border-radius:10px;border:1px solid var(--bd);overflow:hidden;background:var(--sf);margin-bottom:8px}
+.rh{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer}
+.rsw{width:36px;height:36px;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px}
+.rinfo{flex:1}
+.rname{font-size:13px;font-weight:500;color:var(--tx)}
+.rsub{font-size:10px;color:var(--t3);margin-top:1px}
+.rarr{font-size:10px;color:var(--t3);transition:transform .2s}
+.rcard.op .rarr{transform:rotate(180deg)}
+.rb{display:none;padding:0 14px 14px;border-top:1px solid var(--bd)}
+.rcard.op .rb{display:block}
+.rparams{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px}
+.rp{background:var(--sf2);border-radius:6px;padding:7px 9px}
+.rpk{font-size:8.5px;letter-spacing:1px;text-transform:uppercase;color:var(--t3);margin-bottom:2px}
+.rpv{font-size:12px;font-weight:500;color:var(--tx)}
+.rwhen{font-size:11px;color:var(--t2);line-height:1.6;margin-top:10px}
+.sc-wrap{padding:20px}
+.sc-ey{font-size:8px;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
+.sc-h{font-family:var(--bebas);font-size:32px;letter-spacing:1px;color:var(--tx);margin-bottom:4px}
+.sc-sub{font-family:var(--serif);font-size:13px;font-style:italic;font-weight:200;color:var(--t2);margin-bottom:20px;line-height:1.5}
+.scard{border-radius:10px;border:1px solid var(--bd);overflow:hidden;background:var(--sf);margin-bottom:8px}
+.sh2{display:flex;align-items:center;gap:12px;padding:13px 14px;cursor:pointer}
+.sico{width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.sinfo{flex:1}
+.sname{font-size:13px;font-weight:500;color:var(--tx)}
+.slbl2{font-size:10px;color:var(--t3);margin-top:1px}
+.sarr{font-size:10px;color:var(--t3);transition:transform .2s}
+.scard.op .sarr{transform:rotate(180deg)}
+.sb{display:none;padding:0 14px 14px;border-top:1px solid var(--bd)}
+.scard.op .sb{display:block}
+.sprows{display:flex;flex-direction:column;gap:5px;margin-top:10px}
+.sprow{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;background:var(--sf2);border-radius:6px}
+.spk{font-size:10px;color:var(--t3)}
+.spv{font-size:11px;font-weight:500;color:var(--tx)}
+.stip{margin-top:10px;padding:9px 11px;background:rgba(200,168,74,.06);border:1px solid rgba(200,168,74,.15);border-radius:7px;font-size:11px;color:var(--t2);line-height:1.6}
+.stip strong{color:var(--gold);font-weight:500}
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <div class="masthead-eyebrow">Field Guide — 28mm · APS-C</div>
+  <div class="masthead-title">RICOH<br>GR III <em>HDF</em></div>
+  <div class="masthead-sub">Configurazioni complete per ogni scenario.<br>Impostazioni, tecniche e recipe colore.</div>
+</div>
+
+<div class="nav">
+  <button class="nav-tab active" data-s="u1" onclick="sw('u1',this)"><span class="nav-slot">U1</span><span class="nav-name">Street</span></button>
+  <button class="nav-tab" data-s="u2" onclick="sw('u2',this)"><span class="nav-slot">U2</span><span class="nav-name">Notte</span></button>
+  <button class="nav-tab" data-s="u3" onclick="sw('u3',this)"><span class="nav-slot">U3</span><span class="nav-name">Paesaggio</span></button>
+  <button class="nav-tab" data-s="sc" onclick="sw('sc',this)"><span class="nav-slot">&#9654;</span><span class="nav-name">Scenari</span></button>
+</div>
+
+<div class="screen active" id="s-u1">
+  <div class="hero" data-c="u1">
+    <div class="badge" data-c="u1"><span class="bdot" data-c="u1"></span><span class="btxt" data-c="u1">U1 &middot; Street / Snap</span></div>
+    <div class="htitle">STREET<br>&amp; SNAP</div>
+    <div class="htagline">Il setup dell&rsquo;istinto. Accendi, scatti.<br>Nessuna decisione da prendere sul momento.</div>
+    <div class="wbox" data-c="u1">
+      <div class="wlbl" data-c="u1">Quando usarlo</div>
+      <div class="wtxt">Luce diurna o buona luce naturale. Street photography, reportage, vita quotidiana. Quando il soggetto non aspetta e l&rsquo;attimo &egrave; tutto.</div>
+    </div>
+  </div>
+  <div class="sec"><div class="sec-ttl">Impostazioni camera</div><div id="a-u1"></div></div>
+  <div class="tip-sec">
+    <div class="tipcard">
+      <div class="tipey">Tecnica del fotografo</div>
+      <div class="tiptxt">Con il <strong>Full Press Snap attivo</strong>, tieni sempre la camera in AF. Mezzo press quando hai tempo &rarr; AF preciso. Press secco completo &rarr; Snap istantaneo a 2m. Il 28mm con f/8 a 2m ti d&agrave; una zona nitida da circa 1.2m a infinito. <strong>Smetti di mirare, inizia a vedere.</strong></div>
+    </div>
+  </div>
+  <div class="rec-sec"><div class="sec-ttl">Recipe colore consigliate</div><div id="r-u1"></div></div>
+</div>
+
+<div class="screen" id="s-u2">
+  <div class="hero" data-c="u2">
+    <div class="badge" data-c="u2"><span class="bdot" data-c="u2"></span><span class="btxt" data-c="u2">U2 &middot; Notturna</span></div>
+    <div class="htitle">NOTTE &amp;<br>LOW LIGHT</div>
+    <div class="htagline">Luce scarsa, massima qualit&agrave;.<br>Il compromesso intelligente tra rumore, mosso e creativit&agrave;.</div>
+    <div class="wbox" data-c="u2">
+      <div class="wlbl" data-c="u2">Quando usarlo</div>
+      <div class="wtxt">Dopo il tramonto, interni con luce artificiale, golden hour tardivo, locali, concerti, strade illuminate. Qualsiasi situazione dove la luce &egrave; insufficiente per U1.</div>
+    </div>
+  </div>
+  <div class="sec"><div class="sec-ttl">Impostazioni camera</div><div id="a-u2"></div></div>
+  <div class="tip-sec">
+    <div class="tipcard">
+      <div class="tipey">Tecnica del fotografo</div>
+      <div class="tiptxt">Con 1/60 e f/2.8 sei al limite &mdash; qualsiasi vibrazione si vede. Tieni i gomiti contro il corpo, trattieni il respiro nel momento dello scatto. <strong>Il rumore di ISO 3200 in Monotone non &egrave; un difetto: &egrave; grana.</strong> Cartier-Bresson non aveva ISO 100 di notte.</div>
+    </div>
+  </div>
+  <div class="rec-sec"><div class="sec-ttl">Recipe colore consigliate</div><div id="r-u2"></div></div>
+</div>
+
+<div class="screen" id="s-u3">
+  <div class="hero" data-c="u3">
+    <div class="badge" data-c="u3"><span class="bdot" data-c="u3"></span><span class="btxt" data-c="u3">U3 &middot; Paesaggio / Architettura</span></div>
+    <div class="htitle">PAESAGGIO<br>&amp; ARCHI</div>
+    <div class="htagline">Massima qualit&agrave;, zero compromessi.<br>Quando hai tempo di pensare, pensa bene.</div>
+    <div class="wbox" data-c="u3">
+      <div class="wlbl" data-c="u3">Quando usarlo</div>
+      <div class="wtxt">Paesaggi naturali, architettura urbana, skyline, golden hour, soggetti statici con luce controllata. Quando il soggetto non si muove e puoi prenderti il tempo per comporre.</div>
+    </div>
+  </div>
+  <div class="sec"><div class="sec-ttl">Impostazioni camera</div><div id="a-u3"></div></div>
+  <div class="tip-sec">
+    <div class="tipcard">
+      <div class="tipey">Tecnica del fotografo</div>
+      <div class="tiptxt">Il 28mm distorce la prospettiva &mdash; usalo a favore. <strong>Avvicinati agli elementi in primo piano</strong> per esagerarli e creare profondit&agrave;. Per architettura, tieni la camera perfettamente orizzontale &mdash; anche mezzo grado di inclinazione storce le verticali degli edifici.</div>
+    </div>
+  </div>
+  <div class="rec-sec"><div class="sec-ttl">Recipe colore consigliate</div><div id="r-u3"></div></div>
+</div>
+
+<div class="screen" id="s-sc">
+  <div class="sc-wrap">
+    <div class="sc-ey">Guida rapida</div>
+    <div class="sc-h">SCENARI DI LUCE</div>
+    <div class="sc-sub">Ogni condizione di luce richiede un approccio diverso. Tocca per espandere.</div>
+    <div id="sc-list"></div>
+  </div>
+</div>
+
+<script>
+var AU1=[
+  {n:"Modalit\u00e0",v:"M + Auto ISO",d:"#c0420a",t:"Manuale con ISO automatico. Controlli tempo e diaframma, la camera adatta la sensibilit\u00e0. Equivale al comportamento TAv con pi\u00f9 controllo."},
+  {n:"Tempo di scatto",v:"1/500s",d:"#c0420a",t:"Congela qualsiasi movimento. Elimina il mosso da camera senza pensarci. Con il 28mm potresti scendere a 1/250 ma 1/500 \u00e8 la rete di sicurezza definitiva."},
+  {n:"Diaframma",v:"f/8",d:"#9a9080",t:"Con 28mm a f/8 e snap a 2m, la profondit\u00e0 di campo va da circa 1.2m a infinito. Tutto \u00e8 a fuoco. Libera la mente per il momento."},
+  {n:"Auto ISO \u2014 limite",v:"ISO 1600",d:"#3a6ea8",t:"In piena luce diurna star\u00e0 a ISO 100-200. Il limite 1600 \u00e8 la rete di sicurezza per ombre e passaggi coperti. Qualit\u00e0 eccellente fino a ISO 800, ottima fino a 1600."},
+  {n:"Focus",v:"AF + Full Press Snap",d:"#4a8a5a",t:"Mezzo press \u2192 AF normale. Press completo senza fermarti \u2192 Snap istantaneo a 2m. Con f/8 hai un margine di \u00b10.8m sulla stima della distanza."},
+  {n:"Distanza snap",v:"2m",d:"#4a8a5a",t:"La distanza classica GR per street. A 2m con f/8 hai profondit\u00e0 di campo da 1.2m a infinito. Per street aggressiva prova 1.5m."},
+  {n:"Misurazione AE",v:"Multi",d:"#9a9080",t:"Analizza tutta la scena e bilancia le zone. Perfetto per il 90% delle situazioni di luce normale. Robusto, affidabile, non richiede pensiero."},
+  {n:"Image Control",v:"Positive Film",d:"#c0420a",t:"Colori saturi e naturali, contrasto equilibrato. Il profilo che rende meglio su JPEG diretto in luce diurna. Non richiede post-produzione per la maggior parte degli scatti."},
+  {n:"White Balance",v:"Auto",d:"#9a9080",t:"In luce diurna variabile \u00e8 la scelta pi\u00f9 flessibile. Cambia su Luce solare solo se vuoi toni costantemente caldi."},
+  {n:"Formato file",v:"RAW + JPEG",d:"#9a9080",t:"Il JPEG con Positive Film \u00e8 pronto all\u2019uso. Il RAW \u00e8 l\u2019assicurazione per recuperare in post se la luce era complicata."},
+  {n:"Riduzione rumore",v:"Bassa",d:"#9a9080",t:"A ISO bassi non serve. Bassa mantiene il dettaglio senza ammorbidire le texture."},
+  {n:"Stabilizzazione SR",v:"On",d:"#4a8a5a",t:"Sempre attiva. La GR III HDF ha SR ottica \u2014 non c\u2019\u00e8 motivo di spegnerla."},
+  {n:"Anteprima immagine",v:"0.5s o Off",d:"#9a9080",t:"Nella street ogni secondo \u00e8 prezioso. 0.5s massimo \u2014 giusto il tempo di verificare che lo scatto sia partito."},
+  {n:"Collega AE e AF",v:"Off",d:"#9a9080",t:"Con Off la misurazione della luce \u00e8 indipendente dal punto di fuoco. Pi\u00f9 stabile in scene ad alto contrasto."}
+];
+
+var AU2=[
+  {n:"Modalit\u00e0",v:"M + Auto ISO",d:"#3a6ea8",t:"Stessa logica di U1. Controlli tempo e diaframma, l\u2019ISO si adatta alla luce disponibile fino al tuo limite."},
+  {n:"Tempo di scatto",v:"1/60s",d:"#3a6ea8",t:"Il minimo sicuro a mano con 28mm. Regola: 1/focale equivalente \u2192 limite assoluto 1/30, ma 1/60 d\u00e0 il margine necessario. Sotto 1/60 serve appoggio."},
+  {n:"Diaframma",v:"f/2.8",d:"#9a9080",t:"Massima apertura \u2014 entra tutta la luce possibile. Lo sfondo sfocato in notturna aggiunge atmosfera e isola il soggetto."},
+  {n:"Auto ISO \u2014 limite",v:"ISO 6400",d:"#3a6ea8",t:"La GR III HDF regge bene fino a ISO 3200, accettabile a 6400. In Monotone il rumore si integra come grana fotografica \u2014 molto pi\u00f9 elegante che a colori."},
+  {n:"Focus",v:"AF normale",d:"#4a8a5a",t:"In bassa luce lo Snap diventa meno affidabile \u2014 le distanze si stimano male al buio. L\u2019AF della GR III HDF funziona bene anche in condizioni difficili."},
+  {n:"Misurazione AE",v:"Multi",d:"#9a9080",t:"Di notte il Multi gestisce bene le scene con luci puntiformi sparse. Lo Spot pu\u00f2 far bruciare le luci artificiali."},
+  {n:"Image Control",v:"Monotone",d:"#3a6ea8",t:"Il B&N nasconde il rumore cromatico di ISO alti \u2014 quello che a colori sarebbero macchie verdi e magenta, in Monotone diventa grana. Contrast +1, Sharpness 0."},
+  {n:"White Balance",v:"Tungsteno o Auto",d:"#9a9080",t:"Tungsteno mantiene i toni caldi delle luci notturne \u2014 lampioni, vetrine, neon. Auto li raffredda perdendo atmosfera. In Monotone \u00e8 ininfluente."},
+  {n:"Formato file",v:"RAW + JPEG",d:"#9a9080",t:"Di notte il RAW \u00e8 prezioso. Le ombre sono recuperabili in post, le alte luci bruciate no."},
+  {n:"Riduzione rumore",v:"Auto",d:"#9a9080",t:"A ISO alti la riduzione rumore aiuta. Auto bilancia meglio di Alta che ammorbidisce troppo. In Monotone puoi tenerla su Bassa e abbracciare la grana."},
+  {n:"Stabilizzazione SR",v:"On",d:"#4a8a5a",t:"Fondamentale a 1/60 a mano. Senza SR il rischio di mosso da camera \u00e8 concreto."},
+  {n:"Anteprima immagine",v:"Off",d:"#9a9080",t:"Di notte ogni momento \u00e8 diverso dall\u2019altro. Non perdere tempo a guardare lo scatto appena fatto."}
+];
+
+var AU3=[
+  {n:"Modalit\u00e0",v:"Av",d:"#4a8a5a",t:"Priorit\u00e0 diaframma \u2014 la modalit\u00e0 classica del paesaggio. Scegli la profondit\u00e0 di campo, la camera gestisce il tempo. Con treppiede il tempo lungo non \u00e8 un problema."},
+  {n:"Diaframma",v:"f/8 \u2013 f/11",d:"#4a8a5a",t:"La zona di massima nitidezza ottica della GR III HDF. f/8 per bilanciamento ottimale, f/11 per massima DoF in architettura. Evita f/16 \u2014 la diffrazione inizia a smussare i dettagli."},
+  {n:"ISO",v:"100 (fisso)",d:"#9a9080",t:"Il minimo nativo. Massima qualit\u00e0, zero rumore, range dinamico al massimo. Con treppiede non c\u2019\u00e8 motivo di alzare l\u2019ISO."},
+  {n:"Focus",v:"AF Spot o MF",d:"#4a8a5a",t:"Spot AF per selezionare con precisione il punto di fuoco. Per paesaggi con f/8 e 28mm l\u2019iperfocale \u00e8 circa 2m \u2014 tutto da 1m a infinito \u00e8 a fuoco."},
+  {n:"Misurazione AE",v:"Multi",d:"#9a9080",t:"Per paesaggio il Multi funziona bene. In luce estrema (tramonto, controluce) usa Spot sul cielo laterale e blocca con AE Lock."},
+  {n:"Image Control",v:"Positive Film o Vivid",d:"#4a8a5a",t:"Positive Film per colori naturali ed equilibrati \u2014 ottimo per paesaggio verde. Vivid per architettura urbana e cieli drammatici."},
+  {n:"White Balance",v:"Luce solare o Auto",d:"#9a9080",t:"Luce solare per toni costanti tra gli scatti. Auto per adattarsi alle variazioni durante golden hour."},
+  {n:"Formato file",v:"RAW + JPEG",d:"#9a9080",t:"Il RAW \u00e8 prezioso per il paesaggio \u2014 recupero delle alte luci al tramonto, WB in post, HDR manuale da esposizione singola."},
+  {n:"Riduzione rumore",v:"Bassa",d:"#9a9080",t:"A ISO 100 non serve praticamente nulla. Bassa mantiene tutti i dettagli di texture fondamentali in paesaggio e architettura."},
+  {n:"Stabilizzazione SR",v:"On",d:"#4a8a5a",t:"Con treppiede puoi provare Off \u2014 il sensore non cerca di compensare vibrazioni inesistenti. A mano sempre On."},
+  {n:"Anteprima immagine",v:"1s \u2013 2s",d:"#9a9080",t:"In paesaggio hai tempo. L\u2019anteprima ti permette di verificare composizione ed esposizione subito dopo lo scatto."}
+];
+
+var RU1=[
+  {nm:"Kodak Chrome",ic:"&#127914;",bg:"rgba(200,160,80,.15)",bd:"rgba(200,160,80,.3)",sb:"Ritchie\u2019s Ricoh Recipes \u2014 Street Collection",
+   wh:"Recipe da ricohrecipes.com. Estetica slide Kodak classica. Colori vibranti e caldi, ombre profonde. Perfetta per street in luce diurna.",
+   src:"ricohrecipes.com",
+   ps:[{k:"Effect",v:"Positive Film"},{k:"Saturation",v:"+3"},{k:"Hue",v:"-1"},{k:"High/Low Key",v:"-2"},{k:"Contrast",v:"-2"},{k:"Contrast (Hi)",v:"+2"},{k:"Contrast (Sh)",v:"-4"},{k:"Sharpness",v:"+1"},{k:"Clarity",v:"+2"},{k:"WB",v:"Daylight"},{k:"WB Comp.",v:"A:10 G:4"},{k:"EV Comp.",v:"+1/3 a +1"}]},
+  {nm:"Reggie\u2019s Color Negative",ic:"&#127807;",bg:"rgba(180,160,200,.15)",bd:"rgba(180,160,200,.3)",sb:"Reggie Ballesteros \u2014 Analog Collection",
+   wh:"La recipe pi\u00f9 famosa della community GR. Simula la pellicola negativa a colori. Ombre aperte, highlight contenuti, toni caldi. Versatile in ogni situazione.",
+   src:"ricohrecipes.com",
+   ps:[{k:"Effect",v:"Negative Film"},{k:"Saturation",v:"+2"},{k:"Hue",v:"0"},{k:"High/Low Key",v:"0"},{k:"Contrast",v:"+3"},{k:"Contrast (Hi)",v:"-4"},{k:"Contrast (Sh)",v:"-1"},{k:"Sharpness",v:"+1"},{k:"WB",v:"Auto"},{k:"WB Comp.",v:"A:6 G:0"},{k:"EV Comp.",v:"-1/3 a +1/3"}]},
+  {nm:"Natural Negative",ic:"&#127774;",bg:"rgba(160,180,160,.15)",bd:"rgba(160,180,160,.3)",sb:"Ritchie\u2019s Ricoh Recipes \u2014 Street Collection",
+   wh:"Estetica morbida e desaturata che simula la pellicola negativa a colori naturale. Toni freddi, ombre aperte. Ottima per luce diffusa e street discreta.",
+   src:"ricohrecipes.com",
+   ps:[{k:"Effect",v:"Positive Film"},{k:"Saturation",v:"-2"},{k:"Hue",v:"+2"},{k:"High/Low Key",v:"-1"},{k:"Contrast",v:"-2"},{k:"Contrast (Hi)",v:"+3"},{k:"Contrast (Sh)",v:"-4"},{k:"Sharpness",v:"+1"},{k:"Clarity",v:"+2"},{k:"WB",v:"Daylight"},{k:"WB Comp.",v:"A:8 G:2"},{k:"EV Comp.",v:"+1/3 a +1"}]}
+];
+
+var RU2=[
+  {nm:"Dramatic Monochrome",ic:"&#9685;",bg:"rgba(60,60,60,.2)",bd:"rgba(100,100,100,.3)",sb:"Ritchie\u2019s Ricoh Recipes \u2014 B&W Collection",
+   wh:"B&N ad alto contrasto con grana pronunciata. Alti luminosi, ombre profonde. Perfetto per street notturna e scene con luci artificiali dure.",
+   src:"ricohrecipes.com",
+   ps:[{k:"Effect",v:"Hi-Contrast B&W"},{k:"High/Low Key",v:"-1"},{k:"Contrast",v:"+3"},{k:"Contrast (Hi)",v:"-3"},{k:"Contrast (Sh)",v:"-3"},{k:"Sharpness",v:"0"},{k:"Clarity",v:"+1"},{k:"Grain Effect",v:"3"},{k:"WB",v:"CT 10000K"},{k:"WB Comp.",v:"A:0 M:14"},{k:"EV Comp.",v:"-1/3 a +1/3"}]},
+  {nm:"Moody Monochrome",ic:"&#127761;",bg:"rgba(40,50,80,.2)",bd:"rgba(70,90,140,.3)",sb:"Ritchie\u2019s Ricoh Recipes \u2014 B&W Collection",
+   wh:"B&N atmosferico con forte chiaroscuro e grana massima. Ombre recuperate, WB freddo. L\u2019ideale per notturna urbana con molta grana cinematografica.",
+   src:"ricohrecipes.com",
+   ps:[{k:"Effect",v:"BW Monotone"},{k:"High/Low Key",v:"+2"},{k:"Contrast",v:"+4"},{k:"Contrast (Hi)",v:"-2"},{k:"Contrast (Sh)",v:"+2"},{k:"Sharpness",v:"-1"},{k:"Clarity",v:"+4"},{k:"Grain Effect",v:"3"},{k:"WB",v:"CT 2500K"},{k:"WB Comp.",v:"B:14 M:0"},{k:"EV Comp.",v:"+1/3 a +1"}]},
+  {nm:"B&W Neg + Red Filter",ic:"&#128308;",bg:"rgba(80,20,20,.2)",bd:"rgba(140,40,40,.3)",sb:"Ritchie\u2019s Ricoh Recipes \u2014 B&W Collection",
+   wh:"Simula pellicola B&N con filtro rosso. Cieli scuri e drammatici, pelle molto chiara. Hard Monotone per massimo contrasto. Ottimo per notturna con cieli chiari.",
+   src:"ricohrecipes.com",
+   ps:[{k:"Effect",v:"Hard Monotone"},{k:"High/Low Key",v:"+1"},{k:"Contrast",v:"+2"},{k:"Contrast (Hi)",v:"+4"},{k:"Contrast (Sh)",v:"-4"},{k:"Sharpness",v:"+2"},{k:"Grain Effect",v:"2"},{k:"WB",v:"Fluorescent D"},{k:"WB Comp.",v:"B:2 M:14"},{k:"EV Comp.",v:"-2/3 a +1/3"}]}
+];
+
+var RU3=[
+  {nm:"Positive Film (Analog)",ic:"&#127914;",bg:"rgba(200,160,80,.15)",bd:"rgba(200,160,80,.3)",sb:"Ritchie\u2019s Ricoh Recipes \u2014 Analog Collection",
+   wh:"Ispirata alle diapositive Ektachrome E100GX. Colori vibranti e caldi, contrasto elevato, ombre profonde. Eccellente per paesaggio in luce solare diretta.",
+   src:"ricohrecipes.com",
+   ps:[{k:"Effect",v:"Positive Film"},{k:"Saturation",v:"+3"},{k:"Hue",v:"+3"},{k:"High/Low Key",v:"+2"},{k:"Contrast",v:"+4"},{k:"Contrast (Hi)",v:"-2"},{k:"Contrast (Sh)",v:"+4"},{k:"Sharpness",v:"0"},{k:"WB",v:"Auto"},{k:"WB Comp.",v:"A:7 G:3"},{k:"EV Comp.",v:"-2/3 a 0"}]},
+  {nm:"Royal Supra",ic:"&#127749;",bg:"rgba(180,100,60,.15)",bd:"rgba(180,100,60,.3)",sb:"Ritchie\u2019s Ricoh Recipes \u2014 Street Collection",
+   wh:"Ispirata alla Kodak Royal Gold. Toni caldi e ricchi, contrasto elevato, ombre aperte. Eccellente per golden hour e paesaggio con luce calda.",
+   src:"ricohrecipes.com",
+   ps:[{k:"Effect",v:"Positive Film"},{k:"Saturation",v:"+2"},{k:"Hue",v:"-4"},{k:"High/Low Key",v:"+1"},{k:"Contrast",v:"+4"},{k:"Contrast (Hi)",v:"-4"},{k:"Contrast (Sh)",v:"-3"},{k:"Sharpness",v:"+1"},{k:"Clarity",v:"+4"},{k:"WB",v:"Shade"},{k:"WB Comp.",v:"B:6 G:4"},{k:"EV Comp.",v:"0 a +2/3"}]},
+  {nm:"Monochrome Film",ic:"&#9648;",bg:"rgba(120,120,120,.15)",bd:"rgba(140,140,140,.3)",sb:"Ritchie\u2019s Ricoh Recipes \u2014 B&W Collection",
+   wh:"B&N classico con buon contrasto e grana fine. High/Low Key alto per preservare le luci. Ottimo per paesaggio e architettura in B&N.",
+   src:"ricohrecipes.com",
+   ps:[{k:"Effect",v:"BW Monotone"},{k:"High/Low Key",v:"+3"},{k:"Contrast",v:"+4"},{k:"Contrast (Hi)",v:"-4"},{k:"Contrast (Sh)",v:"-4"},{k:"Sharpness",v:"+1"},{k:"Clarity",v:"+2"},{k:"Grain Effect",v:"1"},{k:"WB",v:"Auto"},{k:"EV Comp.",v:"+1/3 a +2/3"}]}
+];
+
+var SC=[
+  {ic:"&#9728;",bg:"rgba(200,168,74,.12)",nm:"Piena luce diurna",lb:"Sole diretto, ombre nette",
+   ps:[{k:"Slot",v:"U1 Street"},{k:"Tempo",v:"1/500s"},{k:"Diaframma",v:"f/8"},{k:"ISO",v:"Auto \u2014 100-200"},{k:"EV",v:"0 o -0.3"}],
+   tp:"In piena luce con ombre forti l\u2019esposimetro pu\u00f2 sottoesporre le ombre. Se il soggetto \u00e8 in ombra con sfondo luminoso, <strong>+0.7 EV</strong>."},
+  {ic:"&#9729;",bg:"rgba(150,160,180,.12)",nm:"Luce diffusa / nuvoloso",lb:"Luce morbida, ombre assenti",
+   ps:[{k:"Slot",v:"U1 Street"},{k:"Tempo",v:"1/250s"},{k:"Diaframma",v:"f/5.6 \u2013 f/8"},{k:"ISO",v:"Auto 200-400"},{k:"EV",v:"0"}],
+   tp:"La luce nuvolosa \u00e8 la pi\u00f9 facile da gestire. <strong>Il momento perfetto per ritratti</strong> \u2014 luce soffusa, zero ombre dure sul viso."},
+  {ic:"&#127748;",bg:"rgba(192,100,50,.12)",nm:"Golden Hour",lb:"Tramonto / Alba \u2014 luce radente",
+   ps:[{k:"Slot",v:"U1 o U3"},{k:"Tempo",v:"1/250s"},{k:"Diaframma",v:"f/5.6 \u2013 f/8"},{k:"ISO",v:"Auto 200-800"},{k:"EV",v:"-0.3 / -0.7"}],
+   tp:"Punta su una zona di cielo laterale, non sulla fonte di luce. AE Lock, poi ricomponi. <strong>Lavora in verticale</strong> \u2014 il cielo vale il frame."},
+  {ic:"&#127751;",bg:"rgba(100,80,140,.12)",nm:"Tramonto / Controluce",lb:"Cielo brillante, soggetto in ombra",
+   ps:[{k:"Slot",v:"U1 o U3"},{k:"Tempo",v:"1/500s"},{k:"Diaframma",v:"f/8"},{k:"ISO",v:"Auto"},{k:"EV",v:"-1 silhouette / +1 soggetto"}],
+   tp:"<strong>Devi scegliere:</strong> esponi per il cielo \u2192 soggetto silhouette. Esponi per il soggetto \u2192 cielo brucia. Non puoi averli entrambi perfetti senza flash."},
+  {ic:"&#127748;",bg:"rgba(60,80,120,.12)",nm:"Ora blu / Crepuscolo",lb:"20 minuti dopo il tramonto",
+   ps:[{k:"Slot",v:"U2 Notte"},{k:"Tempo",v:"1/60s"},{k:"Diaframma",v:"f/2.8"},{k:"ISO",v:"Auto 800-3200"},{k:"EV",v:"0"}],
+   tp:"L\u2019ora blu \u00e8 il momento magico \u2014 cielo ancora luminoso, luci artificiali accese. <strong>Hai circa 15-20 minuti.</strong> Muoviti veloce."},
+  {ic:"&#127750;",bg:"rgba(20,30,60,.15)",nm:"Notturna urbana",lb:"Buio completo, luci artificiali",
+   ps:[{k:"Slot",v:"U2 Notte"},{k:"Tempo",v:"1/60s"},{k:"Diaframma",v:"f/2.8"},{k:"ISO",v:"Auto fino a 6400"},{k:"EV",v:"0 / +0.3"}],
+   tp:"L\u2019esposimetro tende a sottoesporre di notte. <strong>+0.3 EV</strong> come default notturno spesso migliora l\u2019esposizione senza bruciare le luci."},
+  {ic:"&#128337;",bg:"rgba(200,160,80,.12)",nm:"Interno con luce artificiale",lb:"Lampade, neon, luce mista",
+   ps:[{k:"Slot",v:"U2 Notte"},{k:"Tempo",v:"1/60s \u2013 1/125s"},{k:"Diaframma",v:"f/2.8 \u2013 f/4"},{k:"ISO",v:"Auto 800-3200"},{k:"WB",v:"Tungsteno o Auto"}],
+   tp:"La luce mista crea dominanti di colore difficili. <strong>WB Tungsteno</strong> equilibra la luce artificiale calda. Se c\u2019\u00e8 luce naturale dalle finestre, Auto gestisce meglio."},
+  {ic:"&#10052;",bg:"rgba(180,200,220,.12)",nm:"Neve / Scene chiare",lb:"Fondo molto chiaro",
+   ps:[{k:"Slot",v:"U1 o U3"},{k:"Tempo",v:"1/500s"},{k:"Diaframma",v:"f/8"},{k:"ISO",v:"Auto 100"},{k:"EV",v:"+1 / +1.3"}],
+   tp:"La neve inganna sempre l\u2019esposimetro \u2014 la camera la vede come grigio e sottoespone. <strong>+1 EV minimo</strong> per avere la neve bianca."},
+  {ic:"&#127787;",bg:"rgba(160,160,160,.12)",nm:"Nebbia / Foschia",lb:"Contrasto ridotto, atmosfera",
+   ps:[{k:"Slot",v:"U1 o U3"},{k:"Tempo",v:"1/250s"},{k:"Diaframma",v:"f/5.6"},{k:"ISO",v:"Auto 200-400"},{k:"EV",v:"+0.3 / +0.7"}],
+   tp:"La nebbia riduce il contrasto e l\u2019esposimetro tende a sottoesporre. <strong>+0.7 EV</strong> come punto di partenza. In Monotone la nebbia crea profondit\u00e0 aerea spettacolare."}
+];
+
+function sw(name, el) {
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});
+  document.querySelectorAll('.nav-tab').forEach(function(t){t.classList.remove('active')});
+  document.getElementById('s-'+name).classList.add('active');
+  el.classList.add('active');
+}
+
+function togAcc(h) {
+  h.parentElement.classList.toggle('op');
+}
+
+function buildAcc(data, cid) {
+  var c = document.getElementById(cid);
+  data.forEach(function(s) {
+    var d = document.createElement('div');
+    d.className = 'acc';
+    d.innerHTML = '<div class="acc-h" onclick="togAcc(this)"><div class="acc-hl"><div class="adot" style="background:'+s.d+'"></div><span class="aname">'+s.n+'</span></div><div style="display:flex;align-items:center;gap:10px"><span class="aval">'+s.v+'</span><span class="aarr">&#9660;</span></div></div><div class="acc-b">'+s.t+'</div>';
+    c.appendChild(d);
+  });
+}
+
+function togR(h) { h.parentElement.classList.toggle('op'); }
+
+function buildRec(data, cid) {
+  var c = document.getElementById(cid);
+  data.forEach(function(r) {
+    var ps = r.ps.map(function(p){return '<div class="rp"><div class="rpk">'+p.k+'</div><div class="rpv">'+p.v+'</div></div>';}).join('');
+    var d = document.createElement('div');
+    d.className = 'rcard';
+    d.innerHTML = '<div class="rh" onclick="togR(this)"><div class="rsw" style="background:'+r.bg+';border:1px solid '+r.bd+'">'+r.ic+'</div><div class="rinfo"><div class="rname">'+r.nm+'</div><div class="rsub">'+r.sb+'</div></div><span class="rarr">&#9660;</span></div><div class="rb"><div class="rparams">'+ps+'</div><div class="rwhen">'+r.wh+'</div></div>';
+    c.appendChild(d);
+  });
+}
+
+function togS(h) { h.parentElement.classList.toggle('op'); }
+
+function buildSc() {
+  var c = document.getElementById('sc-list');
+  SC.forEach(function(s) {
+    var ps = s.ps.map(function(p){return '<div class="sprow"><span class="spk">'+p.k+'</span><span class="spv">'+p.v+'</span></div>';}).join('');
+    var d = document.createElement('div');
+    d.className = 'scard';
+    d.innerHTML = '<div class="sh2" onclick="togS(this)"><div class="sico" style="background:'+s.bg+'">'+s.ic+'</div><div class="sinfo"><div class="sname">'+s.nm+'</div><div class="slbl2">'+s.lb+'</div></div><span class="sarr">&#9660;</span></div><div class="sb"><div class="sprows">'+ps+'</div><div class="stip">'+s.tp+'</div></div>';
+    c.appendChild(d);
+  });
+}
+
+buildAcc(AU1,'a-u1'); buildAcc(AU2,'a-u2'); buildAcc(AU3,'a-u3');
+buildRec(RU1,'r-u1'); buildRec(RU2,'r-u2'); buildRec(RU3,'r-u3');
+buildSc();
+</script>
+</body>
+</html>

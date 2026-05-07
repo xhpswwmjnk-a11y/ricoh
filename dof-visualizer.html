@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>DoF Visualizer — GR III HDF</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&family=Playfair+Display:ital,wght@1,400;1,600&display=swap');
+
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f0e0c;
+  --sf:#181714;
+  --sf2:#201e1b;
+  --bd:#2a2724;
+  --tx:#f0ece4;
+  --t2:#a09880;
+  --t3:#6b6458;
+  --acc:#c0420a;
+  --acc-l:rgba(192,66,10,.15);
+  --grn:#4a9e6a;
+  --grn-l:rgba(74,158,106,.15);
+  --gold:#d4a847;
+}
+
+body{
+  font-family:'IBM Plex Mono',monospace;
+  background:var(--bg);
+  color:var(--tx);
+  min-height:100svh;
+  padding:20px 16px 40px;
+}
+
+.header{
+  text-align:center;
+  margin-bottom:24px;
+}
+.header-title{
+  font-family:'Playfair Display',serif;
+  font-size:22px;
+  font-style:italic;
+  color:var(--tx);
+  line-height:1.2;
+}
+.header-sub{
+  font-size:9px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:var(--t3);
+  margin-top:5px;
+}
+
+/* CONTROLS */
+.controls{
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+  margin-bottom:24px;
+}
+
+.ctrl-card{
+  background:var(--sf);
+  border:1px solid var(--bd);
+  border-radius:10px;
+  padding:14px;
+}
+
+.ctrl-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:baseline;
+  margin-bottom:10px;
+}
+.ctrl-label{
+  font-size:9px;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  color:var(--t3);
+}
+.ctrl-value{
+  font-size:18px;
+  font-weight:500;
+  color:var(--tx);
+  font-family:'Playfair Display',serif;
+  font-style:italic;
+}
+.ctrl-value span{
+  font-size:11px;
+  color:var(--t2);
+  font-family:'IBM Plex Mono',monospace;
+  font-style:normal;
+}
+
+input[type=range]{
+  -webkit-appearance:none;
+  width:100%;
+  height:2px;
+  background:var(--bd);
+  border-radius:1px;
+  outline:none;
+  cursor:pointer;
+}
+input[type=range]#dist-sl::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  width:20px;height:20px;
+  border-radius:50%;
+  background:var(--bg);
+  border:2px solid var(--acc);
+  cursor:pointer;
+}
+input[type=range]#ap-sl::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  width:20px;height:20px;
+  border-radius:50%;
+  background:var(--bg);
+  border:2px solid var(--grn);
+  cursor:pointer;
+}
+
+.snap-presets{
+  display:flex;
+  gap:5px;
+  margin-top:10px;
+  flex-wrap:wrap;
+}
+.sp{
+  flex:1;
+  min-width:36px;
+  background:var(--sf2);
+  border:1px solid var(--bd);
+  border-radius:5px;
+  padding:5px 3px;
+  text-align:center;
+  font-size:9.5px;
+  color:var(--t2);
+  cursor:pointer;
+  transition:all .15s;
+}
+.sp.active{
+  border-color:var(--acc);
+  color:var(--acc);
+  background:var(--acc-l);
+}
+
+.ap-presets{
+  display:flex;
+  gap:5px;
+  margin-top:10px;
+  flex-wrap:wrap;
+}
+.ap{
+  flex:1;
+  min-width:36px;
+  background:var(--sf2);
+  border:1px solid var(--bd);
+  border-radius:5px;
+  padding:5px 3px;
+  text-align:center;
+  font-size:9.5px;
+  color:var(--t2);
+  cursor:pointer;
+  transition:all .15s;
+}
+.ap.active{
+  border-color:var(--grn);
+  color:var(--grn);
+  background:var(--grn-l);
+}
+
+/* SCENE */
+.scene-wrap{
+  background:var(--sf);
+  border:1px solid var(--bd);
+  border-radius:10px;
+  overflow:hidden;
+  margin-bottom:16px;
+}
+
+.scene-label{
+  padding:10px 14px 0;
+  font-size:9px;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  color:var(--t3);
+}
+
+canvas#scene{
+  display:block;
+  width:100%;
+  height:200px;
+}
+
+/* DOF BAR */
+.dof-bar-wrap{
+  background:var(--sf);
+  border:1px solid var(--bd);
+  border-radius:10px;
+  padding:14px;
+  margin-bottom:16px;
+}
+
+.dof-bar-title{
+  font-size:9px;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  color:var(--t3);
+  margin-bottom:12px;
+}
+
+.dof-ruler{
+  position:relative;
+  height:48px;
+  margin-bottom:6px;
+}
+
+canvas#ruler{
+  display:block;
+  width:100%;
+  height:48px;
+}
+
+.dof-stats{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:8px;
+  margin-top:12px;
+}
+
+.dof-stat{
+  background:var(--sf2);
+  border-radius:7px;
+  padding:9px 10px;
+  text-align:center;
+}
+.dof-stat-lbl{
+  font-size:8px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  color:var(--t3);
+  margin-bottom:4px;
+}
+.dof-stat-val{
+  font-size:15px;
+  font-weight:500;
+  color:var(--tx);
+  font-family:'Playfair Display',serif;
+  font-style:italic;
+}
+.dof-stat-val.acc{color:var(--acc)}
+.dof-stat-val.grn{color:var(--grn)}
+
+/* INSIGHT */
+.insight{
+  background:var(--sf);
+  border:1px solid var(--bd);
+  border-radius:10px;
+  padding:14px;
+  margin-bottom:16px;
+}
+.insight-icon{
+  font-size:20px;
+  margin-bottom:8px;
+  display:block;
+}
+.insight-txt{
+  font-size:12px;
+  color:var(--t2);
+  line-height:1.7;
+}
+.insight-txt strong{
+  color:var(--tx);
+  font-weight:500;
+}
+
+/* COMPARISON */
+.comparison{
+  background:var(--sf);
+  border:1px solid var(--bd);
+  border-radius:10px;
+  padding:14px;
+}
+.comp-title{
+  font-size:9px;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  color:var(--t3);
+  margin-bottom:12px;
+}
+canvas#comp{
+  display:block;
+  width:100%;
+  height:160px;
+  border-radius:6px;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-title">Profondità di campo</div>
+  <div class="header-sub">GR III HDF · 28mm · Visualizer</div>
+</div>
+
+<div class="controls">
+
+  <!-- DISTANZA SNAP -->
+  <div class="ctrl-card">
+    <div class="ctrl-top">
+      <span class="ctrl-label">Distanza snap</span>
+      <span class="ctrl-value" id="dist-display">2 <span>m</span></span>
+    </div>
+    <input type="range" id="dist-sl" min="0" max="7" value="3" step="1">
+    <div class="snap-presets" id="snap-presets"></div>
+  </div>
+
+  <!-- DIAFRAMMA -->
+  <div class="ctrl-card">
+    <div class="ctrl-top">
+      <span class="ctrl-label">Diaframma</span>
+      <span class="ctrl-value" id="ap-display">f/<span id="ap-val">8</span></span>
+    </div>
+    <input type="range" id="ap-sl" min="0" max="6" value="3" step="1">
+    <div class="ap-presets" id="ap-presets"></div>
+  </div>
+
+</div>
+
+<!-- SCENE VISUALIZER -->
+<div class="scene-wrap">
+  <div class="scene-label">Vista dall'alto — zona nitida in verde</div>
+  <canvas id="scene"></canvas>
+</div>
+
+<!-- DOF RULER -->
+<div class="dof-bar-wrap">
+  <div class="dof-bar-title">Zona a fuoco sulla scala delle distanze</div>
+  <canvas id="ruler"></canvas>
+  <div class="dof-stats">
+    <div class="dof-stat">
+      <div class="dof-stat-lbl">Inizio</div>
+      <div class="dof-stat-val acc" id="stat-near">—</div>
+    </div>
+    <div class="dof-stat">
+      <div class="dof-stat-lbl">Zona nitida</div>
+      <div class="dof-stat-val grn" id="stat-dof">—</div>
+    </div>
+    <div class="dof-stat">
+      <div class="dof-stat-lbl">Fine</div>
+      <div class="dof-stat-val acc" id="stat-far">—</div>
+    </div>
+  </div>
+</div>
+
+<!-- INSIGHT -->
+<div class="insight">
+  <span class="insight-icon">💡</span>
+  <div class="insight-txt" id="insight-txt">Muovi gli slider per vedere come cambia la zona a fuoco.</div>
+</div>
+
+<!-- COMPARISON STRIP -->
+<div class="comparison">
+  <div class="comp-title">Bokeh simulato — come appare fuori fuoco</div>
+  <canvas id="comp"></canvas>
+</div>
+
+<script>
+// GR III HDF: focal length 18.3mm, crop factor ~1.53 -> 28mm equiv
+// Circle of confusion for APS-C: 0.019mm
+var FL = 18.3; // mm reale
+var COC = 0.019; // mm
+
+var SNAP_DISTS = [0.3, 1, 1.5, 2, 2.5, 3.5, 5, 20]; // 20 = infinity display
+var SNAP_LABELS = ['0.3m','1m','1.5m','2m','2.5m','3.5m','5m','∞'];
+var AP_VALS = [2.8, 4, 5.6, 8, 11, 16, 22];
+var AP_LABELS = ['f/2.8','f/4','f/5.6','f/8','f/11','f/16','f/22'];
+
+var snapIdx = 3; // default 2m
+var apIdx = 3;   // default f/8
+
+function getDOF(distM, fnum) {
+  var d = distM * 1000; // mm
+  var H = (FL * FL) / (fnum * COC); // hyperfocal in mm
+  if (d >= H) {
+    return { near: H / 2 / 1000, far: Infinity };
+  }
+  var near = (H * d) / (H + d) / 1000;
+  var far  = (H * d) / (H - d) / 1000;
+  if (far < 0) far = Infinity;
+  return { near: near, far: far };
+}
+
+function fmt(v) {
+  if (v === Infinity || v > 50) return '∞';
+  return v.toFixed(1) + 'm';
+}
+
+function buildPresets() {
+  var sc = document.getElementById('snap-presets');
+  SNAP_LABELS.forEach(function(l, i) {
+    var d = document.createElement('div');
+    d.className = 'sp' + (i === snapIdx ? ' active' : '');
+    d.textContent = l;
+    d.addEventListener('click', function() {
+      snapIdx = i;
+      document.getElementById('dist-sl').value = i;
+      updateAll();
+    });
+    sc.appendChild(d);
+  });
+
+  var ac = document.getElementById('ap-presets');
+  AP_LABELS.forEach(function(l, i) {
+    var d = document.createElement('div');
+    d.className = 'ap' + (i === apIdx ? ' active' : '');
+    d.textContent = l;
+    d.addEventListener('click', function() {
+      apIdx = i;
+      document.getElementById('ap-sl').value = i;
+      updateAll();
+    });
+    ac.appendChild(d);
+  });
+}
+
+document.getElementById('dist-sl').addEventListener('input', function() {
+  snapIdx = +this.value;
+  updateAll();
+});
+document.getElementById('ap-sl').addEventListener('input', function() {
+  apIdx = +this.value;
+  updateAll();
+});
+
+function updateAll() {
+  var distM = SNAP_DISTS[snapIdx];
+  var fnum  = AP_VALS[apIdx];
+  var isInf = snapIdx === 7;
+  var displayDist = isInf ? '∞' : distM + 'm';
+
+  // Update displays
+  document.getElementById('dist-display').innerHTML = isInf ? '&#8734; <span>m</span>' : distM + ' <span>m</span>';
+  document.getElementById('ap-val').textContent = fnum;
+
+  // Update preset chips
+  document.querySelectorAll('.sp').forEach(function(el, i) {
+    el.classList.toggle('active', i === snapIdx);
+  });
+  document.querySelectorAll('.ap').forEach(function(el, i) {
+    el.classList.toggle('active', i === apIdx);
+  });
+
+  var realDist = isInf ? 50 : distM;
+  var dof = getDOF(realDist, fnum);
+  var dofRange = dof.far === Infinity ? Infinity : dof.far - dof.near;
+
+  // Stats
+  document.getElementById('stat-near').textContent = fmt(dof.near);
+  document.getElementById('stat-far').textContent = fmt(dof.far);
+  document.getElementById('stat-dof').textContent = dofRange === Infinity ? '∞' : dofRange.toFixed(1) + 'm';
+
+  // Insight
+  updateInsight(realDist, fnum, dof, dofRange);
+
+  // Draw
+  drawScene(realDist, fnum, dof);
+  drawRuler(realDist, fnum, dof);
+  drawComp(fnum);
+}
+
+function updateInsight(dist, fnum, dof, dofRange) {
+  var el = document.getElementById('insight-txt');
+  var near = dof.near, far = dof.far;
+  var msgs = [];
+
+  if (dofRange === Infinity || dofRange > 10) {
+    msgs.push('Con <strong>' + AP_LABELS[apIdx] + '</strong> a <strong>' + dist + 'm</strong> hai una zona nitida praticamente infinita — puoi sbagliare la distanza di molto e la foto viene comunque a fuoco.');
+  } else if (dofRange < 0.5) {
+    msgs.push('Con <strong>' + AP_LABELS[apIdx] + '</strong> a <strong>' + dist + 'm</strong> hai solo <strong>' + dofRange.toFixed(2) + 'm</strong> di zona nitida. Devi indovinare la distanza quasi al centimetro — difficile nella street.');
+  } else {
+    msgs.push('Zona nitida da <strong>' + near.toFixed(1) + 'm</strong> a <strong>' + fmt(far) + '</strong>. Hai <strong>' + dofRange.toFixed(1) + 'm</strong> di margine — abbastanza per la street photography.');
+  }
+
+  if (fnum <= 2.8) {
+    msgs.push('Diaframma aperto = più luce ma pochissima tolleranza sull\'errore di distanza.');
+  } else if (fnum >= 11) {
+    msgs.push('Diaframma chiuso = zona nitida enorme, ma potresti aver bisogno di ISO più alto per mantenere un tempo adeguato.');
+  }
+
+  el.innerHTML = msgs.join(' ');
+}
+
+// ─── SCENE CANVAS ───────────────────────────────────────────────
+function drawScene(distM, fnum, dof) {
+  var cv = document.getElementById('scene');
+  var W = cv.offsetWidth || 360;
+  var H = 200;
+  cv.width = W * window.devicePixelRatio;
+  cv.height = H * window.devicePixelRatio;
+  cv.style.width = W + 'px';
+  cv.style.height = H + 'px';
+  var ctx = cv.getContext('2d');
+  ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+  // Background
+  ctx.fillStyle = '#0f0e0c';
+  ctx.fillRect(0, 0, W, H);
+
+  // Grid lines
+  ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+  ctx.lineWidth = 1;
+  for (var gx = 0; gx < W; gx += 30) {
+    ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, H); ctx.stroke();
+  }
+
+  // Camera position
+  var camX = 40;
+  var camY = H / 2;
+
+  // Scale: max visible = min(distM*2.5, 15) meters
+  var maxM = Math.min(Math.max(distM * 2.5, 6), 15);
+  var scaleX = function(m) { return camX + (m / maxM) * (W - camX - 20); };
+
+  // DOF zone
+  var nearX = scaleX(Math.max(dof.near, 0));
+  var farX  = dof.far === Infinity ? W - 10 : scaleX(Math.min(dof.far, maxM));
+  var zoneW = farX - nearX;
+
+  // Draw DOF zone as gradient band
+  var grad = ctx.createLinearGradient(nearX, 0, farX, 0);
+  grad.addColorStop(0, 'rgba(74,158,106,0)');
+  grad.addColorStop(0.15, 'rgba(74,158,106,0.25)');
+  grad.addColorStop(0.5, 'rgba(74,158,106,0.35)');
+  grad.addColorStop(0.85, 'rgba(74,158,106,0.25)');
+  grad.addColorStop(1, 'rgba(74,158,106,0)');
+  ctx.fillStyle = grad;
+  ctx.fillRect(nearX, 0, zoneW, H);
+
+  // Focus distance line
+  var focX = scaleX(distM > 50 ? maxM * 0.85 : distM);
+  ctx.strokeStyle = 'rgba(192,66,10,0.8)';
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([4, 3]);
+  ctx.beginPath(); ctx.moveTo(focX, 0); ctx.lineTo(focX, H); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Focus distance label
+  ctx.fillStyle = '#c0420a';
+  ctx.font = '9px IBM Plex Mono';
+  ctx.textAlign = 'center';
+  ctx.fillText(distM > 50 ? '∞' : distM + 'm', focX, 12);
+
+  // DOF borders
+  ctx.strokeStyle = 'rgba(74,158,106,0.6)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([3, 4]);
+  ctx.beginPath(); ctx.moveTo(nearX, 0); ctx.lineTo(nearX, H); ctx.stroke();
+  if (dof.far !== Infinity && dof.far <= maxM) {
+    ctx.beginPath(); ctx.moveTo(farX, 0); ctx.lineTo(farX, H); ctx.stroke();
+  }
+  ctx.setLineDash([]);
+
+  // Draw subjects (people silhouettes as circles)
+  var subjects = [
+    { m: 0.5, label: '0.5m' },
+    { m: 1.0, label: '1m' },
+    { m: 1.5, label: '1.5m' },
+    { m: 2.0, label: '2m' },
+    { m: 2.5, label: '2.5m' },
+    { m: 3.5, label: '3.5m' },
+    { m: 5.0, label: '5m' },
+    { m: 8.0, label: '8m' }
+  ];
+
+  var yPositions = [H*0.25, H*0.4, H*0.6, H*0.75, H*0.35, H*0.55, H*0.45, H*0.65];
+
+  subjects.forEach(function(s, i) {
+    if (s.m > maxM) return;
+    var sx = scaleX(s.m);
+    var sy = yPositions[i % yPositions.length];
+    var inFocus = s.m >= dof.near && s.m <= (dof.far === Infinity ? 999 : dof.far);
+
+    // Subject circle
+    var r = 8;
+    ctx.beginPath();
+    ctx.arc(sx, sy, r, 0, Math.PI * 2);
+    if (inFocus) {
+      ctx.fillStyle = 'rgba(74,158,106,0.9)';
+      ctx.fill();
+      ctx.strokeStyle = '#4a9e6a';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    } else {
+      // Blur effect: multiple transparent rings
+      var blurAmt = Math.abs(s.m - distM) * (2.8 / fnum) * 3;
+      blurAmt = Math.min(blurAmt, 12);
+      for (var b = blurAmt; b > 0; b -= 2) {
+        ctx.beginPath();
+        ctx.arc(sx, sy, r + b, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,255,255,' + (0.04 - b * 0.003) + ')';
+        ctx.fill();
+      }
+      ctx.beginPath();
+      ctx.arc(sx, sy, r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(160,150,130,0.3)';
+      ctx.fill();
+    }
+
+    // Label
+    ctx.fillStyle = inFocus ? 'rgba(74,158,106,0.8)' : 'rgba(106,100,88,0.6)';
+    ctx.font = '8px IBM Plex Mono';
+    ctx.textAlign = 'center';
+    ctx.fillText(s.label, sx, sy + r + 10);
+  });
+
+  // Draw camera
+  ctx.fillStyle = '#f0ece4';
+  ctx.beginPath();
+  ctx.roundRect(camX - 22, camY - 10, 22, 20, 3);
+  ctx.fill();
+  // Lens
+  ctx.fillStyle = '#c0420a';
+  ctx.beginPath();
+  ctx.arc(camX, camY, 6, 0, Math.PI * 2);
+  ctx.fill();
+
+  // FOV lines
+  var fovAngle = 37 * Math.PI / 180; // ~GR III HDF 28mm FOV half angle
+  ctx.strokeStyle = 'rgba(192,66,10,0.2)';
+  ctx.lineWidth = 1;
+  var fovLen = W - camX - 10;
+  ctx.beginPath();
+  ctx.moveTo(camX, camY);
+  ctx.lineTo(camX + fovLen, camY - Math.tan(fovAngle) * fovLen);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(camX, camY);
+  ctx.lineTo(camX + fovLen, camY + Math.tan(fovAngle) * fovLen);
+  ctx.stroke();
+
+  // Distance scale at bottom
+  ctx.fillStyle = 'rgba(106,100,88,0.6)';
+  ctx.font = '8px IBM Plex Mono';
+  ctx.textAlign = 'center';
+  var scaleSteps = [1, 2, 3, 5, 8, 10, 15];
+  scaleSteps.forEach(function(m) {
+    if (m > maxM) return;
+    var sx = scaleX(m);
+    ctx.fillText(m + 'm', sx, H - 4);
+    ctx.strokeStyle = 'rgba(106,100,88,0.3)';
+    ctx.lineWidth = 0.5;
+    ctx.beginPath(); ctx.moveTo(sx, H - 14); ctx.lineTo(sx, H - 18); ctx.stroke();
+  });
+}
+
+// ─── RULER CANVAS ───────────────────────────────────────────────
+function drawRuler(distM, fnum, dof) {
+  var cv = document.getElementById('ruler');
+  var W = cv.offsetWidth || 360;
+  var H = 48;
+  cv.width = W * window.devicePixelRatio;
+  cv.height = H * window.devicePixelRatio;
+  cv.style.width = W + 'px';
+  cv.style.height = H + 'px';
+  var ctx = cv.getContext('2d');
+  ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+  ctx.fillStyle = '#181714';
+  ctx.fillRect(0, 0, W, H);
+
+  var maxScale = 12; // meters
+  var toX = function(m) { return Math.min((m / maxScale) * W, W); };
+
+  // Full range bar
+  ctx.fillStyle = '#2a2724';
+  ctx.fillRect(0, 18, W, 12);
+
+  // DOF zone
+  var nearX = toX(Math.max(dof.near, 0));
+  var farX  = dof.far === Infinity ? W : toX(Math.min(dof.far, maxScale));
+  var g = ctx.createLinearGradient(nearX, 0, farX, 0);
+  g.addColorStop(0, 'rgba(74,158,106,0.4)');
+  g.addColorStop(0.4, 'rgba(74,158,106,0.85)');
+  g.addColorStop(0.6, 'rgba(74,158,106,0.85)');
+  g.addColorStop(1, 'rgba(74,158,106,0.4)');
+  ctx.fillStyle = g;
+  ctx.fillRect(nearX, 18, farX - nearX, 12);
+
+  // Focus point
+  var focX = distM > 50 ? W * 0.92 : toX(distM);
+  ctx.fillStyle = '#c0420a';
+  ctx.fillRect(focX - 1.5, 14, 3, 20);
+
+  // Tick marks and labels
+  ctx.fillStyle = 'rgba(106,100,88,0.7)';
+  ctx.font = '8px IBM Plex Mono';
+  ctx.textAlign = 'center';
+  [0.3, 1, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10, 12].forEach(function(m) {
+    var x = toX(m);
+    if (x > W - 5) return;
+    ctx.strokeStyle = 'rgba(106,100,88,0.4)';
+    ctx.lineWidth = 0.5;
+    ctx.beginPath(); ctx.moveTo(x, 35); ctx.lineTo(x, 38); ctx.stroke();
+    ctx.fillText(m + '', x, 47);
+  });
+
+  // Near/far labels
+  ctx.fillStyle = '#4a9e6a';
+  ctx.font = '8px IBM Plex Mono';
+  ctx.textAlign = 'left';
+  ctx.fillText(dof.near.toFixed(1) + 'm', Math.max(nearX, 2), 15);
+  if (dof.far !== Infinity) {
+    ctx.textAlign = 'right';
+    ctx.fillText(dof.far.toFixed(1) + 'm', Math.min(farX, W - 2), 15);
+  } else {
+    ctx.textAlign = 'right';
+    ctx.fillText('∞', W - 2, 15);
+  }
+}
+
+// ─── BOKEH COMPARISON ───────────────────────────────────────────
+function drawComp(fnum) {
+  var cv = document.getElementById('comp');
+  var W = cv.offsetWidth || 360;
+  var H = 160;
+  cv.width = W * window.devicePixelRatio;
+  cv.height = H * window.devicePixelRatio;
+  cv.style.width = W + 'px';
+  cv.style.height = H + 'px';
+  var ctx = cv.getContext('2d');
+  ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+  ctx.fillStyle = '#101010';
+  ctx.fillRect(0, 0, W, H);
+
+  // Simulate a street scene with circles of confusion at different distances
+  var distances = [0.8, 1.5, 2.0, 3.0, 5.0];
+  var distM = SNAP_DISTS[snapIdx] > 50 ? 20 : SNAP_DISTS[snapIdx];
+  var dof = getDOF(distM, fnum);
+
+  // Background "bokeh lights"
+  var lights = [];
+  for (var li = 0; li < 20; li++) {
+    lights.push({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      dm: 0.5 + Math.random() * 8,
+      hue: Math.random() > 0.5 ? 30 : 200
+    });
+  }
+
+  lights.forEach(function(l) {
+    var inFocus = l.dm >= dof.near && l.dm <= (dof.far === Infinity ? 999 : dof.far);
+    var distFromFocus = Math.abs(l.dm - distM);
+    var cocRadius = inFocus ? 1 : Math.min(distFromFocus * (2.8 / fnum) * 8, 30);
+
+    var color = l.hue === 30 ? [212, 168, 71] : [74, 140, 200];
+    var alpha = 0.6;
+
+    if (cocRadius < 3) {
+      ctx.beginPath();
+      ctx.arc(l.x, l.y, 3, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(' + color[0] + ',' + color[1] + ',' + color[2] + ',' + alpha + ')';
+      ctx.fill();
+    } else {
+      // Bokeh disc with soft edge
+      var grad = ctx.createRadialGradient(l.x, l.y, 0, l.x, l.y, cocRadius);
+      grad.addColorStop(0, 'rgba(' + color[0] + ',' + color[1] + ',' + color[2] + ',' + (alpha * 0.4) + ')');
+      grad.addColorStop(0.7, 'rgba(' + color[0] + ',' + color[1] + ',' + color[2] + ',' + (alpha * 0.2) + ')');
+      grad.addColorStop(0.9, 'rgba(' + color[0] + ',' + color[1] + ',' + color[2] + ',' + (alpha * 0.5) + ')');
+      grad.addColorStop(1, 'rgba(' + color[0] + ',' + color[1] + ',' + color[2] + ', 0)');
+      ctx.beginPath();
+      ctx.arc(l.x, l.y, cocRadius, 0, Math.PI * 2);
+      ctx.fillStyle = grad;
+      ctx.fill();
+    }
+  });
+
+  // Label
+  ctx.fillStyle = 'rgba(160,152,128,0.7)';
+  ctx.font = '9px IBM Plex Mono';
+  ctx.textAlign = 'left';
+  ctx.fillText('Con ' + AP_LABELS[apIdx] + ' — più aperto = dischi bokeh più grandi fuori fuoco', 8, H - 6);
+}
+
+// Init
+buildPresets();
+updateAll();
+
+// Redraw on resize
+window.addEventListener('resize', function() { updateAll(); });
+</script>
+</body>
+</html>
